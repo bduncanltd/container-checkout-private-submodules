@@ -1,5 +1,7 @@
 # container-checkout-private-submodules
 
+[![Lint](https://github.com/bduncanltd/container-checkout-private-submodules/actions/workflows/lint.yml/badge.svg)](https://github.com/bduncanltd/container-checkout-private-submodules/actions/workflows/lint.yml)
+
 A GitHub composite action that checks out a repository and initialises private submodules via SSH inside a GitHub Actions container job.
 
 ## The problem

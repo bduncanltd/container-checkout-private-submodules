@@ -5,7 +5,12 @@ description: >
 
 inputs:
   ssh-private-key:
+    description: The private SSH key to use for authentication when checking out submodules.
     required: true
+  lfs:
+    description: Whether to download Git LFS files.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -30,6 +35,8 @@ runs:
     # because it authenticates using the workflow's GITHUB_TOKEN, which only has access to the repository the
     # workflow is running in. It cannot access private submodules in other repositories.
     - uses: actions/checkout@v6
+      with:
+        lfs: ${{ inputs.lfs }}
 
     # GitHub Actions creates the workspace directory on the host runner as the runner user (uid 1001).
     # When the container runs as a different user, git sees a directory owned by someone else and refuses to

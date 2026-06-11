@@ -41,6 +41,7 @@ jobs:
       - uses: bduncanltd/container-checkout-private-submodules@v1
         with:
           ssh-private-key: ${{ secrets.SSH_DEPLOY_KEY }}
+          lfs: true # optional, defaults to false
       - run: # ... rest of your job
 ```
 
@@ -49,6 +50,7 @@ jobs:
 | Input | Required | Description |
 | --- | --- | --- |
 | `ssh-private-key` | Yes | SSH private key with read access to submodule repos. |
+| `lfs` | No | Whether to download Git LFS files. Defaults to `false`. |
 
 ## Security
 

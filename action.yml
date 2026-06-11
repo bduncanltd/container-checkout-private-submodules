@@ -1,0 +1,51 @@
+name: Container checkout with private submodules
+description: >
+  Checks out the repo and initialises submodules via SSH inside a container job.
+  Assumes the ssh-private-key input has access to all submodule repositories, and that submodules are hosted on GitHub.
+
+inputs:
+  ssh-private-key:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # webfactory/ssh-agent is a JavaScript action that runs on the HOST runner, not inside the container.
+    # By default it creates its socket somewhere under /tmp on the host, which is not mounted into the container.
+    # We force it to create the socket in /home/runner/work/_temp/_github_workflow instead, because GitHub Actions
+    # always mounts that directory into the container at /github/workflow, making the socket accessible from inside.
+    # https://github.com/webfactory/ssh-agent#action-inputs
+    - uses: webfactory/ssh-agent@v0.10.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+        ssh-auth-sock: /home/runner/work/_temp/_github_workflow/ssh-agent.sock
+
+    # GitHub Actions sets HOME=/github/home inside container jobs, rather than /root.
+    # This means ~ resolves to /github/home, so ssh-keyscan writes GitHub's host key to /github/home/.ssh/known_hosts.
+    # The GIT_SSH_COMMAND in the submodule step below tells SSH to look for known_hosts there.
+    - run: mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+      shell: bash
+
+    # Checks out the repo without submodules. We don't use the built-in submodules option of actions/checkout
+    # because it authenticates using the workflow's GITHUB_TOKEN, which only has access to the repository the
+    # workflow is running in. It cannot access private submodules in other repositories.
+    - uses: actions/checkout@v6
+
+    # GitHub Actions creates the workspace directory on the host runner as the runner user (uid 1001).
+    # When the container runs as a different user, git sees a directory owned by someone else and refuses to
+    # operate in it as a security measure. This tells git to trust all directories regardless of ownership.
+    # https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory
+    - run: git config --global --add safe.directory '*'
+      shell: bash
+
+    - run: git submodule update --init
+      shell: bash
+      env:
+        # webfactory/ssh-agent normally exports SSH_AUTH_SOCK pointing to its socket on the host runner.
+        # Inside the container that path doesn't exist, so we override it with the container-side path
+        # of the socket we forced it to create above (/home/runner/work/_temp/_github_workflow = /github/workflow).
+        SSH_AUTH_SOCK: /github/workflow/ssh-agent.sock
+        # SSH looks for known_hosts in /root/.ssh by default, but we wrote it to /github/home/.ssh above
+        # because HOME=/github/home inside the container. This tells SSH which file to use.
+        # https://git-scm.com/docs/git-config#Documentation/git-config.txt-coresshCommand
+        GIT_SSH_COMMAND: ssh -o UserKnownHostsFile=/github/home/.ssh/known_hosts

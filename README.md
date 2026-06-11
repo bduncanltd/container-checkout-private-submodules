@@ -50,6 +50,10 @@ jobs:
 | --- | --- | --- |
 | `ssh-private-key` | Yes | SSH private key with read access to submodule repos. |
 
+## Security
+
+The `ssh-private-key` input is passed directly to `webfactory/ssh-agent`, which loads it into memory and never writes it to disk.
+
 ## Future improvements
 
 - The `git submodule update --init` command is not configurable. There is no way to pass extra flags such as `--recursive` or `--depth`.

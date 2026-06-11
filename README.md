@@ -55,6 +55,7 @@ jobs:
 ## Security
 
 The `ssh-private-key` input is passed directly to `webfactory/ssh-agent`, which loads it into memory and never writes it to disk.
+The public key fingerprint is suppressed from logs via `log-public-key: false`.
 
 ## Future improvements
 

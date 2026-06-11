@@ -24,6 +24,7 @@ runs:
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
         ssh-auth-sock: /home/runner/work/_temp/_github_workflow/ssh-agent.sock
+        log-public-key: false
 
     # GitHub Actions sets HOME=/github/home inside container jobs, rather than /root.
     # This means ~ resolves to /github/home, so ssh-keyscan writes GitHub's host key to /github/home/.ssh/known_hosts.

@@ -11,6 +11,10 @@ inputs:
     description: Whether to download Git LFS files.
     required: false
     default: 'false'
+  persist-credentials:
+    description: Whether to persist the GITHUB_TOKEN in the git config. This is not needed for submodule authentication and is a security risk if left enabled, so it defaults to false.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -20,7 +24,8 @@ runs:
     # We force it to create the socket in /home/runner/work/_temp/_github_workflow instead, because GitHub Actions
     # always mounts that directory into the container at /github/workflow, making the socket accessible from inside.
     # https://github.com/webfactory/ssh-agent#action-inputs
-    - uses: webfactory/ssh-agent@v0.10.0
+    # Pin the exact commit for safety (tags are mutable)
+    - uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
         ssh-auth-sock: /home/runner/work/_temp/_github_workflow/ssh-agent.sock
@@ -35,8 +40,10 @@ runs:
     # Checks out the repo without submodules. We don't use the built-in submodules option of actions/checkout
     # because it authenticates using the workflow's GITHUB_TOKEN, which only has access to the repository the
     # workflow is running in. It cannot access private submodules in other repositories.
-    - uses: actions/checkout@v6
+    # Pin the exact commit for safety (tags are mutable)
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
+        persist-credentials: ${{ inputs.persist-credentials }}
         lfs: ${{ inputs.lfs }}
 
     # GitHub Actions creates the workspace directory on the host runner as the runner user (uid 1001).

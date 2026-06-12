@@ -56,10 +56,10 @@ jobs:
 ## Security
 
 - The `ssh-private-key` input is passed directly to `webfactory/ssh-agent`, which loads it into memory and never writes it to disk.
-The public key fingerprint is suppressed from logs via `log-public-key: false`.
+- The public key is suppressed from logs via `log-public-key: false`.
 - Both third-party actions (`webfactory/ssh-agent` and `actions/checkout`) are pinned to immutable commit SHAs rather than mutable version tags, so the action runs the exact code that was reviewed regardless of any future tag changes.
 - `actions/checkout` is configured with `persist-credentials: false` by default to prevent the `GITHUB_TOKEN` from being written into the repository's git config, where any subsequent step running inside the container could read it.
-Since submodule authentication is handled entirely via the SSH agent, the token is not needed. Set `persist-credentials: true` only if a later step in your job requires it.
+  Since submodule authentication is handled entirely via the SSH agent, the token is not needed. Set `persist-credentials: true` only if a later step in your job requires it.
 
 ## Future improvements
 
